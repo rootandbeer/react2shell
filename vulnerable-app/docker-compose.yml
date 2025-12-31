@@ -1,0 +1,10 @@
+services:
+  vulnerable-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8443:3000"  # Using 8443 to match scanner default port
+    environment:
+      - NODE_ENV=production
+
