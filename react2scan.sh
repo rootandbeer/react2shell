@@ -27,8 +27,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "[*] React2Shell Detection Probe (CVE‑2025‑55182 / CVE‑2025‑66478)"
+echo "[*] https://www.rootandbeer.com"
 echo ""
-echo "[*] Port: $PORT"
+echo "[*] Default Port: $DEFAULT_PORT"
 echo ""
 
 BOUNDARY="----WebKitFormBoundaryx8jO2oVc6SWP3Sad"
@@ -141,3 +142,4 @@ else
     echo "[*] Scanning single host"
     scan_target "http://$TARGET_INPUT:$PORT"
 fi
+
