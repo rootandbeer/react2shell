@@ -1,0 +1,88 @@
+name: GitHub Clone Count Update (Parity Test)
+
+# ==============================
+# This workflow is for testing purposes only.
+# It runs the new running-total clone script alongside the original gist-based workflow.
+# All files have unique names to avoid conflicts.
+# ==============================
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  update-clone-count:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Fetch GitHub clone stats
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Temporary file storing today's API clone stats
+          curl -s -H "Accept: application/vnd.github.v3+json" \
+               -H "Authorization: token $GITHUB_TOKEN" \
+               https://api.github.com/repos/${{ github.repository }}/traffic/clones \
+               > new_today.json
+
+      - name: Update running-total clone.json
+        run: |
+          # Initialize new_clone.json if missing
+          if [ ! -f new_clone.json ]; then
+            echo '{"total_count":0,"total_uniques":0,"history":[]}' > new_clone.json
+          fi
+
+          # Extract today's clone stats
+          today_count=$(jq '.count' new_today.json)
+          today_uniques=$(jq '.uniques' new_today.json)
+          date=$(date -u +"%Y-%m-%d")
+
+          # Read existing totals
+          total_count=$(jq '.total_count' new_clone.json)
+          total_uniques=$(jq '.total_uniques' new_clone.json)
+
+          # Compute new running totals
+          new_total_count=$((total_count + today_count))
+          new_total_uniques=$((total_uniques + today_uniques))
+
+          # Append today's record to history
+          jq --arg date "$date" --argjson count "$today_count" --argjson uniques "$today_uniques" \
+            '.history += [{"date": $date, "count": $count, "uniques": $uniques}] | 
+             .total_count = $new_total_count | 
+             .total_uniques = $new_total_uniques' \
+            --argjson new_total_count "$new_total_count" \
+            --argjson new_total_uniques "$new_total_uniques" new_clone.json > new_clone_tmp.json
+
+          mv new_clone_tmp.json new_clone.json
+
+      - name: Generate Shields.io badge markdown (Parity Test)
+        run: |
+          # Badge points to new_clone.json to avoid conflict with original badge
+          shields="https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=total_count&url="
+          url="https://raw.githubusercontent.com/${{ github.repository }}/main/new_clone.json"
+          repo="https://github.com/${{ github.repository }}"
+
+          # Create new_CLONE.md for parity testing
+          cat > new_CLONE.md <<EOL
+# Parity Test Badge
+
+**Markdown**
+\`\`\`markdown
+[![GitHub Clones]($shields$url&logo=github)]($repo)
+\`\`\`
+
+**HTML**
+\`\`\`html
+<a href='$repo'><img alt='GitHub Clones' src='$shields$url&logo=github'></a>
+\`\`\`
+EOL
+
+      - name: Commit and push changes (Parity Test)
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Parity Test: Update running total clone count"
+          branch: main
