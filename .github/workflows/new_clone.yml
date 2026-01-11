@@ -70,16 +70,16 @@ jobs:
           cat > new_CLONE.md <<EOL
 # Parity Test Badge
 
-**Markdown**
-\`\`\`markdown
-[![GitHub Clones]($shields$url&logo=github)]($repo)
-\`\`\`
+          **Markdown**
+          \`\`\`markdown
+          [![GitHub Clones]($shields$url&logo=github)]($repo)
+          \`\`\`
 
-**HTML**
-\`\`\`html
-<a href='$repo'><img alt='GitHub Clones' src='$shields$url&logo=github'></a>
-\`\`\`
-EOL
+          **HTML**
+          \`\`\`html
+          <a href='$repo'><img alt='GitHub Clones' src='$shields$url&logo=github'></a>
+          \`\`\`
+          EOL
 
       - name: Commit and push changes (Parity Test)
         uses: stefanzweifel/git-auto-commit-action@v4
