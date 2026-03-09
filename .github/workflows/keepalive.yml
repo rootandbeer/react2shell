@@ -1,6 +1,6 @@
 name: repo-keepalive
 
-on:
+'on':
   schedule:
     - cron: "0 0 1 * *"   # once per month
   workflow_dispatch:
