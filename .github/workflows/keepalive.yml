@@ -1,0 +1,12 @@
+name: keepalive
+
+on:
+  schedule:
+    - cron: "0 0 */20 * *"   # every 20 days
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Keeping workflow active"
